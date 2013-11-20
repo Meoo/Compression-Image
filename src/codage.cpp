@@ -105,7 +105,7 @@ void decodeDivResolution(float** compress, int width, int height) {
 int main(int argc, char** argv) {
     cout << "Matrices" << endl;
     int width = 4, height = 4;
-    // Matrice de test en dur
+   
     cout << "codage matrice 4x4" << endl;
     float** mat;
     mat = new float*[height];			// nombre de lignes
@@ -114,27 +114,15 @@ int main(int argc, char** argv) {
     for(int i=0; i<height; i++){		// pour chaque ligne : width colonnes
 	mat[i] = new float[width];
 	
-	for(int j=0; j<width; j++, indice++)	// remplissage du tableau
+	for(int j=0; j<width; j++, indice++)	// remplissage du tableau (0 a 15)
 	    mat[i][j] = indice;
     }
     
-						// Affichage du tableau
-  /*  for(int i=0; i<width; i++){
-        for (int j=0; j<height; j++){
-            cout << "\t|\t" << mat[i][j]  ;
-        }
-	cout << "\t|" << endl;
-    }*/
-
-//    int mat[4][4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}}; 
     divResolution(mat, 4, 4);
     
-    cout << endl << "décodage matrice 2x3" << endl;
-//    float mat2[3][3] = {{3.5,5.5,7.5},{11.5,13.5,15.5},{8,9,10}};
+    cout << endl << "décodage matrice 4x4" << endl;
     decodeDivResolution(mat, 4, 4);
-    
-    //decodeDivResolution(mat, 4, 4);
-    
+        
     cout << "FIN !" << endl;
     
     return 0;
