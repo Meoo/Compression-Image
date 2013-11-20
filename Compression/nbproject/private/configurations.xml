@@ -2,6 +2,9 @@
 <configurationDescriptor version="88">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="../src" name="src">
+      <df name="codage_differentiel">
+        <in>differentiel.cpp</in>
+      </df>
       <df name="GNU-amd64-Windows">
       </df>
       <df name="modele_image">

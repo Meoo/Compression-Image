@@ -7,27 +7,25 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
 /* Function to calculate the average of 4 neighbors pixels
  *
  */
-float moyenne(float** raw, int x, int y){
-    float moyenne = raw[x][y] + raw[x+1][y] + raw[x][y+1] + raw[x+1][y+1];
-    
-    moyenne = moyenne/4;
-    
-    return moyenne;
+int moyenne(int** raw, int x, int y){
+    int average = round((raw[x][y] + raw[x+1][y] + raw[x][y+1] + raw[x+1][y+1])/4.0);
+    cout << average << endl;
+    return average;
 }
 
 
 /* Function to code 
  *
  */
-void divResolution(float** raw, int width, int height) {
-    float compress[width/2][height/2];
-
+void divResolution(int** raw, int width, int height) {
+    int compress[width/2][height/2];
     
     for (int i=0; i<=width-1; i=i+2)
     {
@@ -42,6 +40,7 @@ void divResolution(float** raw, int width, int height) {
         }
     }
 
+    //*** Affichage des matrices pour verifier
     for(int i=0; i<width; i++){
         for (int j=0; j<height; j++){
             cout << "\t|\t" << raw[i][j]  ;
@@ -57,6 +56,7 @@ void divResolution(float** raw, int width, int height) {
         }
 	cout << "\t|" << endl;
     }
+    //***
 }    
 
 
@@ -64,8 +64,8 @@ void divResolution(float** raw, int width, int height) {
 /* Function to decode  
  *
  */
-void decodeDivResolution(float** compress, int width, int height) {
-    float raw[width*2][height*2];
+void decodeDivResolution(int** compress, int width, int height) {
+    int raw[width*2][height*2];
 
     for (int i=0; i<=width-1; i++)
     {
@@ -78,7 +78,7 @@ void decodeDivResolution(float** compress, int width, int height) {
         }
     }
 
-    
+    //*** Affichage des matrices pour verifier
     for(int i=0; i<width; i++){
         for (int j=0; j<height; j++){
             cout << "\t|\t" << compress[i][j]  ;
@@ -94,6 +94,7 @@ void decodeDivResolution(float** compress, int width, int height) {
         }
 	cout << "\t|" << endl;
     }
+    //***
 }   
 
 
@@ -101,23 +102,23 @@ void decodeDivResolution(float** compress, int width, int height) {
 
 /*
  * Main
- */
+ *
 int main(int argc, char** argv) {
     cout << "Matrices" << endl;
     int width = 4, height = 4;
    
     cout << "codage matrice 4x4" << endl;
-    float** mat;
-    mat = new float*[height];			// nombre de lignes
+    int** mat;
+    mat = new int*[height];			// nombre de lignes
     int indice = 0;				// utilisé juste pour remplir le tableau de valeurs
     
     for(int i=0; i<height; i++){		// pour chaque ligne : width colonnes
-	mat[i] = new float[width];
+	mat[i] = new int[width];
 	
 	for(int j=0; j<width; j++, indice++)	// remplissage du tableau (0 a 15)
 	    mat[i][j] = indice;
     }
-    
+
     divResolution(mat, 4, 4);
     
     cout << endl << "décodage matrice 4x4" << endl;
@@ -127,4 +128,5 @@ int main(int argc, char** argv) {
     
     return 0;
 }
+*/
 
