@@ -1,95 +1,93 @@
-#include<iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <iostream>
+#include <stdio.h>
+
+#include "Image.h"
 
 using namespace std;
 
-int const width = 6;
-int const height = 5;
-int matrix[height][width] = {{125,212,22,30,58,136}, {15,112,38,110,236,114}, {125,112,58,106,95,22}, {68,145,36,234,45,36}, {36,25,14,215,31,115}};
-
-void diff_encode(int taille_blocs, int mat[][6], int width, int height) {
+void diff_encode(int taille_blocs, Image img) {
 	int delta = 0;
-	int moy = 0;
-	int sum = 0;
+	int moyR = 0, moyG = 0, moyB = 0;
+	int sumR = 0, sumG = 0, sumB = 0;
 	int k = 0;
 	int i = 0;
 	int widthmoy = 0;
-	int differences[height][width];
-	int imagedecodee[height][width];
+	Image difference = Image(img.getWidth(), img.getHeight());
+	Image imagedecodee = Image(img.getWidth(), img.getHeight());;
 	int m = 0;
 
 	// Calcul de la dimension de la matrice des moyennes
-	int wmodulo = width%taille_blocs;
-	if(wmodulo == 0) widthmoy = width/taille_blocs;
-	else widthmoy = width/taille_blocs+1;
+	int wmodulo = img.getWidth() % taille_blocs;
+	if (wmodulo == 0) widthmoy = img.getWidth() / taille_blocs;
+	else widthmoy = img.getWidth() / taille_blocs + 1;
 
-	int moyennes[height][widthmoy];
+	Image moyennes = Image(widthmoy, img.getHeight());
 
 	// Calcul de la matrice des moyennes
-	while(k < height) {
-		sum += mat[k][i];
+	while (k < img.getHeight()) {
+
+		sumR += img.getPixel(i,k).getR();
+		sumG += img.getPixel(i,k).getV();
+		sumB += img.getPixel(i,k).getB();
 		i++;
-		if(i == taille_blocs) {
-			moy = sum/taille_blocs;
-			moyennes[k][m] = moy;
+
+		if (i%taille_blocs == 0 && i != 0) {
+			moyR = sumR / taille_blocs;
+			moyG = sumG / taille_blocs;
+			moyB = sumB / taille_blocs;
+			//cout << "m = " << m << " k = " << k << " nBlock = " << taille_blocs  << " i=" << i <<  endl;
+			moyennes.setPixel(Pixel(moyR, moyG, moyB), m, k);
 			m++;
-			sum = 0;
+
+			sumR = 0;
+			sumG = 0;
+			sumB = 0;
 		}
-		if(i == width) {
-			moy = sum/(i%taille_blocs);
-			moyennes[k][m] = moy;
+		if (i == img.getWidth()) {
+
+			//cout << " i=" << i << endl;
+			if (i%taille_blocs != 0) {
+				moyR = sumR / (i%taille_blocs);
+				moyG = sumG / (i%taille_blocs);
+				moyB = sumB / (i%taille_blocs);
+				moyennes.setPixel(Pixel(moyR, moyG, moyB), m, k);
+				
+
+				sumR = 0;
+				sumG = 0;
+				sumB = 0;
+			}
 			m = 0;
-			sum = 0;
 			k++;
 			i = 0;
 		}
 	}
-
 	k = 0;
-	i = 0;	
-
-	cout << endl;
+	i = 0;
 
 	// Calcul de la matrice différentielle
-	while(k < height) {
-		differences[k][i] = mat[k][i] - moyennes[k][i/taille_blocs];
+	while (k < img.getHeight()) {
+		difference.setPixel(img.getPixel(i, k).sub(moyennes.getPixel(i / taille_blocs, k)), i, k);
 		i++;
-		if(i == width) {
+		if (i == img.getWidth()) {
 			k++;
 			i = 0;
 		}
 	}
 
-	cout << "Matrice des pixels" << endl;
-	// Affichage de la matrice des pixels
-	for(int x = 0; x < height; x++) {
-		for(int y = 0; y < width; y++) {
-			cout << mat[x][y] << " ";
-		}
-		cout << endl;
-	}
-
-	cout << endl;
-
 	cout << "Matrice des moyennes" << endl;
-	// Affichage de la matrice des moyennes
-	for(int x = 0; x < height; x++) {
-		for(int y = 0; y < widthmoy; y++) {
-			cout << moyennes[x][y] << " ";
-		}
-		cout << endl;
-	}
-
+	cout << moyennes.getWidth() << endl;
+	IplImage *imgMoy = moyennes.getIplImage();
+	cvNamedWindow("Moyennes", 1);
+	cvShowImage("Moyennes", imgMoy);
 	cout << endl;
 
 	cout << "Matrice des différences" << endl;
-	// Affichage de la matrice des differences
-	for(int x = 0; x < height; x++) {
-		for(int y = 0; y < width; y++) {
-			cout << differences[x][y] << " ";
-		}
-		cout << endl;
-	}
-
+	IplImage *imgDiff = difference.getIplImage();
+	cvNamedWindow("Difference", 1);
+	cvShowImage("Difference", imgDiff);
 	cout << endl;
 
 	k = 0;
@@ -97,26 +95,38 @@ void diff_encode(int taille_blocs, int mat[][6], int width, int height) {
 
 	// DECODAGE
 	// Calcul de la matrice image
-	while(k < height) {
-		imagedecodee[k][i] = differences[k][i] + moyennes[k][i/taille_blocs];
+	while (k < img.getHeight()) {
+		imagedecodee.setPixel(difference.getPixel(i, k).add(moyennes.getPixel(i / taille_blocs, k)), i, k);
 		i++;
-		if(i == width) {
+		if (i == img.getWidth()) {
 			k++;
 			i = 0;
 		}
 	}
 
 	cout << "Matrice image décodée" << endl;
-	// Affichage de la matrice image
-	for(int x = 0; x < height; x++) {
-		for(int y = 0; y < width; y++) {
-			cout << imagedecodee[x][y] << " ";
-		}
-		cout << endl;
-	}
-	
+	IplImage *imgDec = imagedecodee.getIplImage();
+	cvNamedWindow("Decodee", 1);
+	cvShowImage("Decodee", imgDec);
 }
 
-/*int main() {
-	diff_encode(4, matrix, width, height);
-}*/
+int main()
+{
+	IplImage *img = cvLoadImage("C:\\Users\\Flow\\Documents\\Cours\\3A Premier semestre\\Analyse d\'images\\Images\\lena_color_512.png");
+
+	Image image = Image(img);
+
+	diff_encode(4, image);
+	cout << "Taille: " << image.getSize() << " octets" << endl;
+
+	IplImage *che = image.getIplImage();
+
+	cvNamedWindow("OpenCV", 1);
+	cvShowImage("OpenCV", che);
+
+	cvWaitKey(0);
+	cvDestroyWindow("OpenCV ");
+	cvReleaseImage(&img);
+
+	return 0;
+}
