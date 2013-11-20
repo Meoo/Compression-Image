@@ -2,7 +2,7 @@
  * File:   codage.cpp
  * Author: Gildas
  *
- * Created on 23 octobre 2013, 14:46
+ * Created on 20 novembre 2013, 14:59
  */
 
 #include <cstdlib>
@@ -13,7 +13,7 @@ using namespace std;
 /* Function to calculate the average of 4 neighbors pixels
  *
  */
-float moyenne(int raw[][4], int x, int y){
+float moyenne(float** raw, int x, int y){
     float moyenne = raw[x][y] + raw[x+1][y] + raw[x][y+1] + raw[x+1][y+1];
     
     moyenne = moyenne/4;
@@ -25,9 +25,10 @@ float moyenne(int raw[][4], int x, int y){
 /* Function to code 
  *
  */
-void divResolution(int raw[][4], int width, int height) {
+void divResolution(float** raw, int width, int height) {
     float compress[width/2][height/2];
 
+    
     for (int i=0; i<=width-1; i=i+2)
     {
         for (int j=0; j<=height-1; j=j+2)
@@ -63,7 +64,7 @@ void divResolution(int raw[][4], int width, int height) {
 /* Function to decode  
  *
  */
-void decodeDivResolution(float compress[][3], int width, int height) {
+void decodeDivResolution(float** compress, int width, int height) {
     float raw[width*2][height*2];
 
     for (int i=0; i<=width-1; i++)
@@ -103,15 +104,34 @@ void decodeDivResolution(float compress[][3], int width, int height) {
  */
 int main(int argc, char** argv) {
     cout << "Matrices" << endl;
-    
+    int width = 4, height = 4;
     // Matrice de test en dur
     cout << "codage matrice 4x4" << endl;
-    int mat[4][4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}}; 
+    float** mat;
+    mat = new float*[height];			// nombre de lignes
+    int indice = 0;				// utilisé juste pour remplir le tableau de valeurs
+    
+    for(int i=0; i<height; i++){		// pour chaque ligne : width colonnes
+	mat[i] = new float[width];
+	
+	for(int j=0; j<width; j++, indice++)	// remplissage du tableau
+	    mat[i][j] = indice;
+    }
+    
+						// Affichage du tableau
+  /*  for(int i=0; i<width; i++){
+        for (int j=0; j<height; j++){
+            cout << "\t|\t" << mat[i][j]  ;
+        }
+	cout << "\t|" << endl;
+    }*/
+
+//    int mat[4][4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}}; 
     divResolution(mat, 4, 4);
     
     cout << endl << "décodage matrice 2x3" << endl;
-    float mat2[3][3] = {{3.5,5.5,7.5},{11.5,13.5,15.5},{8,9,10}};
-    decodeDivResolution(mat2, 3, 3);
+//    float mat2[3][3] = {{3.5,5.5,7.5},{11.5,13.5,15.5},{8,9,10}};
+    decodeDivResolution(mat, 4, 4);
     
     //decodeDivResolution(mat, 4, 4);
     

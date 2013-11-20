@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="88">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="../src" name="src">
+      <df name="outils_bits">
+        <in>outil_bits_in.cpp</in>
+        <in>outil_bits_in.h</in>
+        <in>outil_bits_out.cpp</in>
+        <in>outil_bits_out.h</in>
+      </df>
+      <in>Makefile</in>
+      <in>Pixel.h</in>
+      <in>codage.cpp</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>../src</Elem>
+  </sourceRootList>
+  <projectmakefile>../Compression-Image/Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>../src</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath>..\Compression-Image\dist\Debug\MinGW-Windows\compression-image.exe</executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="../src/Makefile" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/Pixel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/codage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/outils_bits/outil_bits_in.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+        <ccTool>
+        </ccTool>
+      </item>
+      <item path="../src/outils_bits/outil_bits_in.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/outils_bits/outil_bits_out.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+        <ccTool>
+        </ccTool>
+      </item>
+      <item path="../src/outils_bits/outil_bits_out.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <folder path="src/outils_bits">
+        <ccTool>
+          <incDir>
+            <pElem>../src/outils_bits</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+    </conf>
+  </confs>
+</configurationDescriptor>
