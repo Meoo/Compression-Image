@@ -117,6 +117,6 @@ void diff_encode(int taille_blocs, int mat[][6], int width, int height) {
 	
 }
 
-int main() {
+/*int main() {
 	diff_encode(4, matrix, width, height);
-}
+}*/
