@@ -6,19 +6,24 @@ class Pixel
 {
 public:
 	Pixel();
-	Pixel(uchar r, uchar v, uchar b);
+	Pixel(int r, int v, int b);
 
-	uchar getR();
-	uchar getV();
-	uchar getB();
+	int getR();
+	int getV();
+	int getB();
 
-	void setR(uchar r);
-	void setV(uchar v);
-	void setB(uchar b);
+	void setR(int r);
+	void setV(int v);
+	void setB(int b);
+
+	Pixel sub(Pixel p);
+	Pixel add(Pixel p);
+	Pixel div(Pixel p);
+	Pixel mul(Pixel p);
 
 	~Pixel();
 
 private:
-	uchar r, v, b;
-	int x, y;
+	int r, v, b;
 };
+
