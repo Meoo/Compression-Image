@@ -2,7 +2,7 @@
 #include <opencv2\core\core.hpp>
 #include <opencv2\highgui\highgui.hpp>
 
-#include "Image.h"
+#include "modele_image/Image.h"
 
 using namespace std;
 
