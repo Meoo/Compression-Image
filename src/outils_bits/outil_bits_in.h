@@ -5,46 +5,82 @@
 #ifndef __OUTILS_BITS_IN_H__
 #define __OUTILS_BITS_IN_H__
 
+#include <stdexcept>
+
 typedef bool bit_t;
 typedef unsigned char byte_t;
 
 /**
- * Classe pour lire des bits dans un buffer.
+ * Classe pour lire des bits dans un flux.
  */
+template<class T>
 class FluxBitsIn
 {
 private:
-    const byte_t * buffer;
-    const unsigned taille;
+    T & _flux;
     
-    // Octets déjà lus
-    unsigned position;
+    // Octet en cours
+    unsigned char _octet;
 
     // Bits déjà lus dans l'octet à "position"
-    unsigned position_bit;
+    unsigned _position_bit;
 
 public:
     /**
-     * Construire un flux de bits à partir d'un buffer.
+     * Construire un flux de bits.
      *
-     * @param buffer Buffer à utiliser.
-     * @param taille Taille du buffer.
+     * @param flux Flux à utiliser.
      */
-    FluxBitsIn(const byte_t * buffer, unsigned taille);
+    FluxBitsIn(T & flux)
+        : _flux(flux), _position_bit(0)
+    {
+        suivant();
+    }
 
     /**
      * Lire un bit.
      *
      * @return Bit lu.
      */
-    bit_t lire_bit();
+    bit_t lire_bit()
+    {
+        bit_t bit = _octet >> (7 - _position_bit) & 1;
+
+        if (++_position_bit == 8)
+        {
+            suivant();
+            _position_bit = 0;
+        }
+
+        return bit;
+    }
 
     /**
      * Lire un octet.
      *
      * @return Octet lu.
      */
-    byte_t lire_octet();
+    byte_t lire_octet()
+    {
+        byte_t byte = 0;
+
+        if (_position_bit == 0)
+        {
+            // Lire un octet entier
+            byte = _octet;
+            
+            suivant();
+        }
+        else
+        {
+            // Lire un octet sur deux octets
+            byte = _octet << _position_bit;
+            suivant();
+            byte |= _octet >> (8 - _position_bit);
+        }
+
+        return byte;
+    }
 
     /**
      * Lire un entier avec un nombre variable de bits (jusqu'à 64).
@@ -52,15 +88,32 @@ public:
      * @param nombre_bits Nombre de bits à lire (max 64).
      * @return Entier lu.
      */
-    unsigned long long lire_entier(unsigned nombre_bits);
+    unsigned long long lire_entier(unsigned nombre_bits)
+    {
+        if (nombre_bits > 64 || nombre_bits == 0)
+            throw std::range_error("Nombre invalide de bits demandé");
 
+        unsigned long long res = 0;
+        
+        // Lire les petits bits qui trainent avant
+        while (nombre_bits % 8 > 0)
+            res |= ((unsigned long long) lire_bit()) << (--nombre_bits);
+        
+        // Lire les blocs d'octets
+        while (nombre_bits > 0)
+            res |= ((unsigned long long) lire_octet()) << (nombre_bits -= 8);
+        
+        return res;
+    }
+    
 private:
-    // Avancer position et position_bits de nombre_bits
-    void avancer(unsigned nombre_bits);
-
-    // Vérifier que nombre_bits soient encore présents
-    // Lève une exception en cas d'erreur
-    void verifier_dispo_or_throw(unsigned nombre_bits);
+    /**
+     * Lire l'octet suivant.
+     */
+    void suivant()
+    {
+        _flux.read((char *)&_octet, 1);
+    }
 
 };
 

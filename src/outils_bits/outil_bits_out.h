@@ -5,46 +5,74 @@
 #ifndef __OUTILS_BITS_OUT_H__
 #define __OUTILS_BITS_OUT_H__
 
+#include <stdexcept>
+
 typedef bool bit_t;
 typedef unsigned char byte_t;
 
 /**
- * Classe pour écrire des bits dans un buffer.
+ * Classe pour écrire des bits dans un flux.
  */
+template<class T>
 class FluxBitsOut
 {
 private:
-    const byte_t * buffer;
-    const unsigned taille;
+    T & _flux;
     
-    // Octets déjà lus
-    unsigned position;
+    // Octet en cours
+    unsigned char _octet;
 
     // Bits déjà lus dans l'octet à "position"
-    unsigned position_bit;
+    unsigned _position_bit;
 
 public:
     /**
-     * Construire un flux de bits à partir d'un buffer.
+     * Construire un flux de bits.
      *
-     * @param buffer Buffer à utiliser.
-     * @param taille Taille du buffer.
+     * @param flux Flux à utiliser.
      */
-    FluxBitsOut(const byte_t * buffer, unsigned taille);
+    FluxBitsOut(T & flux)
+        : _flux(flux), _octet(0), _position_bit(0)
+    {
+    }
 
     /**
      * Ecrire un bit.
      *
-     * @param bit Bit lu.
+     * @param bit Bit à écrire.
      */
-    void ecrire_bit(bit_t bit);
+    void ecrire_bit(bit_t bit)
+    {
+        _octet |= (bit << (7 - _position_bit));
+
+        if (++_position_bit == 8)
+        {
+            suivant();
+            _position_bit = 0;
+        }
+    }
 
     /**
      * Ecrire un octet.
      *
-     * @param octet Octet lu.
+     * @param octet Octet à écrire.
      */
-    void ecrire_octet(byte_t octet);
+    void ecrire_octet(byte_t byte)
+    {
+        if (_position_bit == 0)
+        {
+            // Ecrire un octet entier
+            _octet = byte;
+            suivant();
+        }
+        else
+        {
+            // Ecrire un octet sur deux octets
+            _octet |= byte >> _position_bit;
+            suivant();
+            _octet |= byte << (8 - _position_bit);
+        }
+    }
 
     /**
      * Ecrire un entier avec un nombre variable de bits (jusqu'à 64).
@@ -52,15 +80,41 @@ public:
      * @param nombre_bits Nombre de bits à écrire (max 64).
      * @param entier Entier à écrire.
      */
-    void ecrire_entier(unsigned nombre_bits, unsigned long long entier);
+    void ecrire_entier(unsigned nombre_bits, unsigned long long entier)
+    {
+        if (nombre_bits > 64 || nombre_bits == 0)
+            throw std::range_error("Nombre invalide de bits demandé");
 
+        // Lire les petits bits qui trainent avant
+        while (nombre_bits % 8 > 0)
+            ecrire_bit(entier >> --nombre_bits);
+        
+        // Lire les blocs d'octets
+        while (nombre_bits > 0)
+            ecrire_octet(entier >> (nombre_bits -= 8));
+    }
+    
+    /**
+     * Remplir les derniers bits de 0.
+     */
+    void finaliser()
+    {
+        if (_position_bit != 0)
+        {
+            suivant();
+            _position_bit = 0;
+        }
+    }
+    
 private:
-    // Avancer position et position_bits de nombre_bits
-    void avancer(unsigned nombre_bits);
-
-    // Vérifier que nombre_bits soient encore présents
-    // Lève une exception en cas d'erreur
-    void verifier_dispo_or_throw(unsigned nombre_bits);
+    /**
+     * Ecrire un octet et passer au suivant.
+     */
+    void suivant()
+    {
+        _flux.write((const char *)&_octet, 1);
+        _octet = 0;
+    }
 
 };
 
