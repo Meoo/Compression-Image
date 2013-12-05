@@ -87,11 +87,15 @@ public:
 
         // Lire les petits bits qui trainent avant
         while (nombre_bits % 8 > 0)
-            ecrire_bit(entier >> --nombre_bits);
+        {
+            ecrire_bit((entier >> (--nombre_bits)) & 1);
+        }
         
         // Lire les blocs d'octets
         while (nombre_bits > 0)
+        {
             ecrire_octet(entier >> (nombre_bits -= 8));
+        }
     }
     
     /**

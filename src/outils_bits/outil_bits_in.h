@@ -76,7 +76,7 @@ public:
             // Lire un octet sur deux octets
             byte = _octet << _position_bit;
             suivant();
-            byte |= _octet >> (8 - _position_bit);
+            byte |= (_octet >> (8 - _position_bit));
         }
 
         return byte;
