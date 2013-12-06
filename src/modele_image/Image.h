@@ -2,11 +2,13 @@
 #include <opencv2\core\core.hpp>
 #include <opencv2\highgui\highgui.hpp>
 
-#include "modele_image/Pixel.h"
+#include "Pixel.h"
 
 class Image
 {
 public:
+
+	Image(int width, int height);
 	Image(IplImage* img);
 
 	int getWidth(void);
@@ -25,3 +27,4 @@ private:
 	IplImage* image;
 	Pixel **pixels;
 };
+
