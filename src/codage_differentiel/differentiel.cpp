@@ -7,7 +7,37 @@
 
 using namespace std;
 
-void diff_encode(int taille_blocs, Image img) {
+
+
+///////////////////////////////////////////
+///// Décodage différentiel en ligne
+///////////////////////////////////////////
+
+void diff_decode_line(int taille_blocs, Image difference, Image moyennes, int originalWidth, int originalHeight) {
+    Image imagedecodee = Image(originalWidth, originalHeight);
+    int k = 0;
+	int i = 0;
+	// Calcul de la matrice image
+	while (k < originalHeight) {
+		imagedecodee.setPixel(difference.getPixel(i, k).add(moyennes.getPixel(i / taille_blocs, k)), i, k);
+		i++;
+		if (i == originalWidth) {
+			k++;
+			i = 0;
+		}
+	}
+
+	cout << "Matrice image décodée" << endl;
+	IplImage *imgDec = imagedecodee.getIplImage();
+	cvNamedWindow("Decodee", 1);
+	cvShowImage("Decodee", imgDec);
+}
+
+///////////////////////////////////////////
+///// Codage différentiel en ligne
+///////////////////////////////////////////
+
+void diff_encode_line(int taille_blocs, Image img) {
 	int delta = 0;
 	int moyR = 0, moyG = 0, moyB = 0;
 	int sumR = 0, sumG = 0, sumB = 0;
@@ -15,7 +45,6 @@ void diff_encode(int taille_blocs, Image img) {
 	int i = 0;
 	int widthmoy = 0;
 	Image difference = Image(img.getWidth(), img.getHeight());
-	Image imagedecodee = Image(img.getWidth(), img.getHeight());;
 	int m = 0;
 
 	// Calcul de la dimension de la matrice des moyennes
@@ -53,7 +82,7 @@ void diff_encode(int taille_blocs, Image img) {
 				moyG = sumG / (i%taille_blocs);
 				moyB = sumB / (i%taille_blocs);
 				moyennes.setPixel(Pixel(moyR, moyG, moyB), m, k);
-				
+
 
 				sumR = 0;
 				sumG = 0;
@@ -90,42 +119,24 @@ void diff_encode(int taille_blocs, Image img) {
 	cvShowImage("Difference", imgDiff);
 	cout << endl;
 
-	k = 0;
-	i = 0;
-
-	// DECODAGE
-	// Calcul de la matrice image
-	while (k < img.getHeight()) {
-		imagedecodee.setPixel(difference.getPixel(i, k).add(moyennes.getPixel(i / taille_blocs, k)), i, k);
-		i++;
-		if (i == img.getWidth()) {
-			k++;
-			i = 0;
-		}
-	}
-
-	cout << "Matrice image décodée" << endl;
-	IplImage *imgDec = imagedecodee.getIplImage();
-	cvNamedWindow("Decodee", 1);
-	cvShowImage("Decodee", imgDec);
+	diff_decode_line(taille_blocs, difference, moyennes, img.getWidth(), img.getHeight());
 }
 
 int main()
 {
-	IplImage *img = cvLoadImage("C:\\Users\\Flow\\Documents\\Cours\\3A Premier semestre\\Analyse d\'images\\Images\\lena_color_512.png");
+	IplImage *img = cvLoadImage("C:\\Users\\Timothy\\Desktop\\TMP\\lena_color_512.png");
 
 	Image image = Image(img);
 
-	diff_encode(4, image);
-	cout << "Taille: " << image.getSize() << " octets" << endl;
+	diff_encode_line(7, image);
 
 	IplImage *che = image.getIplImage();
 
-	cvNamedWindow("OpenCV", 1);
-	cvShowImage("OpenCV", che);
+	cvNamedWindow("Originale", 1);
+	cvShowImage("Originale", che);
 
 	cvWaitKey(0);
-	cvDestroyWindow("OpenCV ");
+	cvDestroyWindow("Originale");
 	cvReleaseImage(&img);
 
 	return 0;
