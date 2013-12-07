@@ -8,6 +8,7 @@
 #include <map>
 
 #include <outils_bits/outil_bits_out.h>
+#include "huffman_config.h"
 
 /**
  * Encodeur de Huffman.
@@ -49,7 +50,7 @@ public:
     void ecrire_table_symboles()
     {
         // Nombre de symboles
-        _bit_stream.ecrire_entier(32, _symboles.size());
+        _bit_stream.ecrire_entier(HUFFMAN_NOMBRE_SYMBOLES_BITS, _symboles.size());
 
         for (symap_t::iterator it = _symboles.begin(); it != _symboles.end(); ++it)
         {
@@ -60,7 +61,7 @@ public:
             _bit_stream.ecrire_entier(it->second.second, it->second.first);
 
             // Symbole
-            _bit_stream.ecrire_entier(32, it->first);
+            _bit_stream.ecrire_entier(HUFFMAN_SYMBOLE_BITS, it->first);
         }
     }
 

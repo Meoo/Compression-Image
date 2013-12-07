@@ -6,6 +6,7 @@
 #define __HUFFMAN_DECODE_H__
 
 #include <outils_bits/outil_bits_in.h>
+#include "huffman_config.h"
 
 /**
  * Décodeur de Huffman.
@@ -89,7 +90,7 @@ public:
     void lire_table_symboles()
     {
         // Nombre de symboles
-        unsigned size =  _bit_stream.lire_entier(32);
+        unsigned size =  _bit_stream.lire_entier(HUFFMAN_NOMBRE_SYMBOLES_BITS);
 
         for (unsigned i = 0; i < size; ++i)
         {
@@ -100,7 +101,7 @@ public:
             unsigned enco = _bit_stream.lire_entier(nb_bits);
 
             // Symbole
-            int symbole = (int) _bit_stream.lire_entier(32);
+            int symbole = (int) _bit_stream.lire_entier(HUFFMAN_SYMBOLE_BITS);
 
             // Insertion de la branche dans l'arbre
             Noeud * n = racine;
