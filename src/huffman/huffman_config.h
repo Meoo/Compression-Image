@@ -1,4 +1,4 @@
-/**
+﻿/**
  * huffman_config.h
  */
 
@@ -9,6 +9,6 @@
 #define HUFFMAN_NOMBRE_SYMBOLES_BITS 9
 
 // Nombre de bits sur lequel un unique symbole est encodé
-#define HUFFMAN_SYMBOLE_BITS 9
+#define HUFFMAN_SYMBOLE_BITS 16
 
 #endif
