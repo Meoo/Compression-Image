@@ -1,4 +1,4 @@
-﻿/**
+/**
  * huffman_config.h
  */
 
