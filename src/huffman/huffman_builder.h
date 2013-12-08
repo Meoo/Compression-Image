@@ -22,7 +22,7 @@ class HuffmanBuilder
      */
     symap_t _symboles;
     
-    // Variables pour la r�cursion
+    // Variables pour la récursion
     unsigned _enco;
     unsigned _nb_bits;
     void * _huff;
@@ -34,7 +34,7 @@ public:
     HuffmanBuilder() {}
     
     /**
-     * Ajouter ou incr�menter le nombre d'occurences d'un symbole.
+     * Ajouter ou incrémenter le nombre d'occurences d'un symbole.
      */
     void ajouter_symbole(int symbole, unsigned occurences);
     
@@ -49,7 +49,7 @@ private:
     class Noeud;
 
     /**
-     * R�cursion sur les noeuds.
+     * Récursion sur les noeuds.
      */
     template<class T>
     void traiter_noeud(Noeud * noeud);
@@ -145,16 +145,16 @@ void HuffmanBuilder::construire_encodeur(HuffmanEncode<T> & encodeur)
         vec.push_back(n);
     }
 
-    // L'arbre est pr�t
+    // L'arbre est prét
     Noeud * arbre = vec.at(0);
 
-    // Ajouter les symboles � l'encodeur
+    // Ajouter les symboles à l'encodeur
     _nb_bits = 0;
     _enco = 0;
     _huff = reinterpret_cast<void*>(&encodeur);
     traiter_noeud<T>(arbre);
 
-    // Lib�rer la m�moire
+    // Libérer la mémoire
     delete arbre;
 }
 
@@ -173,11 +173,11 @@ void HuffmanBuilder::traiter_noeud(Noeud * noeud)
     {
         ++_nb_bits;
 
-        // Bit � 1
+        // Bit à 1
         _enco |= 1ull << (32 - _nb_bits);
         traiter_noeud<T>(noeud->noeud.droite);
 
-        // Bit � 0
+        // Bit à 0
         _enco &= ~(1ull << (32 - _nb_bits));
         traiter_noeud<T>(noeud->noeud.gauche);
 

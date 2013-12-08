@@ -8,6 +8,8 @@
 #include <outils_bits/outil_bits_in.h>
 #include "huffman_config.h"
 
+#include <stdexcept>
+
 /**
  * Décodeur de Huffman.
  *
@@ -16,7 +18,7 @@
 template<class T>
 class HuffmanDecode
 {
-    // <tableau de bits, nombre de bits � utiliser>
+    // <tableau de bits, nombre de bits à utiliser>
     typedef std::pair<unsigned long long, unsigned> enco_t;
     typedef std::map<int, enco_t> symap_t;
 
@@ -156,6 +158,9 @@ public:
 
             else
                 n = n->noeud.bit_0;
+
+            if (n == 0)
+                throw std::domain_error("Séquence de bits inconnue");
         }
 
         return n->symbole;
