@@ -59,6 +59,22 @@ void encoder()
     fichier_huff.encoder(2);
     fichier_huff.encoder(2);
 
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+
+    fichier_huff.encoder(2);
+    fichier_huff.encoder(2);
+
+    fichier_huff.encoder(3);
+    fichier_huff.encoder(3);
+
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+    fichier_huff.encoder(1);
+
     fichier_huff.encoder(4);
     fichier_huff.encoder(4);
 

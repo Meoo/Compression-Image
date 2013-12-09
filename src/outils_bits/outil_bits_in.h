@@ -112,7 +112,7 @@ private:
      */
     void suivant()
     {
-        _flux.read((char *)&_octet, 1);
+        _flux.get((char&) _octet);
     }
 
 };

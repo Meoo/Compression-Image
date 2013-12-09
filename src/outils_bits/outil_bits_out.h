@@ -18,7 +18,7 @@ class FluxBitsOut
 {
 private:
     T & _flux;
-    
+
     // Octet en cours
     unsigned char _octet;
 
@@ -43,7 +43,7 @@ public:
      */
     void ecrire_bit(bit_t bit)
     {
-        _octet |= (bit << (7 - _position_bit));
+        _octet |= ((bit & 1) << (7 - _position_bit));
 
         if (++_position_bit == 8)
         {
@@ -84,20 +84,16 @@ public:
     {
         if (nombre_bits > 64 || nombre_bits == 0)
             throw std::range_error("Nombre invalide de bits demandé");
-
+        
         // Lire les petits bits qui trainent avant
         while (nombre_bits % 8 > 0)
-        {
             ecrire_bit((entier >> (--nombre_bits)) & 1);
-        }
-        
+
         // Lire les blocs d'octets
         while (nombre_bits > 0)
-        {
             ecrire_octet(entier >> (nombre_bits -= 8));
-        }
     }
-    
+
     /**
      * Remplir les derniers bits de 0.
      */
@@ -109,14 +105,14 @@ public:
             _position_bit = 0;
         }
     }
-    
+
 private:
     /**
      * Ecrire un octet et passer au suivant.
      */
     void suivant()
     {
-        _flux.write((const char *)&_octet, 1);
+        _flux.put((const char) _octet);
         _octet = 0;
     }
 

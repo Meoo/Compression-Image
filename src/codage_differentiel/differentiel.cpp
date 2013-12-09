@@ -111,48 +111,179 @@ void diff_encode_quad(int taille_blocs, Image img, Image& moyennes, Image& diffe
 	}
 }
 
-int main()
-{
-	IplImage *img = cvLoadImage("C:\\Users\\Timothy\\Desktop\\src\\lena_color_512.png");
 
-    int taille_blocs = 3;
+#include <bitset>
+
+static int TAILLE_BLOCS = 4;
+
+
+void encoder(const char * fic, int taille_blocs)
+{
+	IplImage *img = cvLoadImage(fic);
+
 	Image image = Image(img);
+
+                        IplImage *che = image.getIplImage();
+                        cvNamedWindow("Originale", 1);
+                        cvShowImage("Originale", che);
+    
     Image differences = Image(image.getWidth(), image.getHeight());
     Image moyennes = Image(image.getWidth()/taille_blocs, image.getHeight()/taille_blocs);
-    Image imagedecodee = Image(image.getWidth(), image.getHeight());
+    
 	diff_encode_quad(taille_blocs, image, moyennes, differences);
 
-	cout << "Matrice des moyennes" << endl;
-	cout << moyennes.getWidth() << endl;
-	IplImage *imgMoy = moyennes.getIplImage();
-	cvNamedWindow("Moyennes", 1);
-	cvShowImage("Moyennes", imgMoy);
-	cout << endl;
+    // Flux de sortie
+    std::ofstream fichier("sortie.bin", std::ios_base::out | std::ios_base::binary);
 
-	cout << "Matrice des différences" << endl;
-	IplImage *imgDiff = differences.getIplImage();
-	cvNamedWindow("Difference", 1);
-	cvShowImage("Difference", imgDiff);
-	cout << endl;
+    // Flux de bits
+    FluxBitsOut<std::ofstream> fichier_bits(fichier);
 
+    fichier_bits.ecrire_entier(32, image.getWidth());
+    fichier_bits.ecrire_entier(32, image.getHeight());
+    fichier_bits.ecrire_octet(taille_blocs);
+    
+                            cout << "width " << moyennes.getWidth() << endl;
+                            cout << "height " << moyennes.getHeight() << endl;
+                            cout << "taille_blocs " << taille_blocs << endl;
+
+
+    // Moyennes
+    for (unsigned x = 0; x < moyennes.getWidth(); ++x)
+    {
+        for (unsigned y = 0; y < moyennes.getHeight(); ++y)
+        {
+            Pixel p = moyennes.getPixel(x, y);
+            fichier_bits.ecrire_octet(p.getR());
+            fichier_bits.ecrire_octet(p.getV());
+            fichier_bits.ecrire_octet(p.getB());
+        }
+    }
 
     // HUFFMAN !
+    
+    // Differences
+    // Construction de Huffman
+    HuffmanBuilder builder;
+    for (unsigned x = 0; x < differences.getWidth(); ++x)
+    {
+        for (unsigned y = 0; y < differences.getHeight(); ++y)
+        {
+            Pixel p = differences.getPixel(x, y);
+            builder.ajouter_symbole(p.getR(), 1);
+            builder.ajouter_symbole(p.getV(), 1);
+            builder.ajouter_symbole(p.getB(), 1);
+        }
+    }
+
+    // Encodeur Huffman
+    HuffmanEncode<std::ofstream> fichier_huff(fichier_bits);
+    builder.construire_encodeur(fichier_huff);
+    fichier_huff.ecrire_table_symboles();
+
+    for (unsigned x = 0; x < differences.getWidth(); ++x)
+    {
+        for (unsigned y = 0; y < differences.getHeight(); ++y)
+        {
+            Pixel p = differences.getPixel(x, y);
+            fichier_huff.encoder(p.getR());
+            fichier_huff.encoder(p.getV());
+            fichier_huff.encoder(p.getB());
+        }
+    }
+
+    // Fermer le fichier
+
+    // Ecrire les derniers bits du buffer dans le flux
+    fichier_bits.finaliser();
+
+    // Finaliser l'ecriture dans le fichier
+    fichier.close();
+}
+
+void decoder()
+{
+    
+    // Construire le décodeur
+
+    // Flux d'entrée
+    std::ifstream fichier("sortie.bin", std::ios_base::in | std::ios_base::binary);
+
+    // Flux de bits
+    FluxBitsIn<std::ifstream> fichier_bits(fichier);
+    
+    unsigned width = fichier_bits.lire_entier(32);
+    unsigned height = fichier_bits.lire_entier(32);
+    int taille_blocs = fichier_bits.lire_octet();
+
+    Image differences = Image(width, height);
+    Image moyennes = Image((width+taille_blocs-1)/taille_blocs, (height+taille_blocs-1)/taille_blocs);
+    Image imagedecodee = Image(width, height);
+    
+                            cout << "width " << moyennes.getWidth() << endl;
+                            cout << "height " << moyennes.getHeight() << endl;
+                            cout << "taille_blocs " << taille_blocs << endl;
+
+    // Moyennes
+    for (unsigned x = 0; x < moyennes.getWidth(); ++x)
+    {
+        for (unsigned y = 0; y < moyennes.getHeight(); ++y)
+        {
+            Pixel p;
+            p.setR(fichier_bits.lire_octet());
+            p.setV(fichier_bits.lire_octet());
+            p.setB(fichier_bits.lire_octet());
+            moyennes.setPixel(p, x, y);
+        }
+    }
+
+    
+    // Décodeur Huffman
+    HuffmanDecode<std::ifstream> fichier_huff(fichier_bits);
+    fichier_huff.lire_table_symboles();
+
+    // Différences
+    for (unsigned x = 0; x < differences.getWidth(); ++x)
+    {
+        for (unsigned y = 0; y < differences.getHeight(); ++y)
+        {
+            Pixel p;
+            p.setR(fichier_huff.decoder());
+            p.setV(fichier_huff.decoder());
+            p.setB(fichier_huff.decoder());
+            differences.setPixel(p, x, y);
+        }
+    }
 
     diff_decode_quad(taille_blocs, differences, moyennes, imagedecodee);
 
-    cout << "Matrice image décodée" << endl;
-	IplImage *imgDec = imagedecodee.getIplImage();
-	cvNamedWindow("Decodee", 1);
-	cvShowImage("Decodee", imgDec);
+                            cout << "Matrice des moyennes" << endl;
+                            cout << moyennes.getWidth() << endl;
+                            IplImage *imgMoy = moyennes.getIplImage();
+                            cvNamedWindow("Moyennes", 1);
+                            cvShowImage("Moyennes", imgMoy);
+                            cout << endl;
 
-	IplImage *che = image.getIplImage();
+                            cout << "Matrice des différences" << endl;
+                            IplImage *imgDiff = differences.getIplImage();
+                            cvNamedWindow("Difference", 1);
+                            cvShowImage("Difference", imgDiff);
+                            cout << endl;
 
-	cvNamedWindow("Originale", 1);
-	cvShowImage("Originale", che);
+                            cout << "Matrice image décodée" << endl;
+                            IplImage *imgDec = imagedecodee.getIplImage();
+                            cvNamedWindow("Decodee", 1);
+                            cvShowImage("Decodee", imgDec);
+}
+
+int main()
+{
+    encoder("lena.png", TAILLE_BLOCS);
+    
+    std::cout << std::endl << std::endl;
+    
+    decoder();
 
 	cvWaitKey(0);
-	cvDestroyWindow("Originale");
-	cvReleaseImage(&img);
 
 	return 0;
 }

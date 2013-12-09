@@ -92,7 +92,7 @@ public:
     void lire_table_symboles()
     {
         // Nombre de symboles
-        unsigned size =  _bit_stream.lire_entier(HUFFMAN_NOMBRE_SYMBOLES_BITS);
+        unsigned size = _bit_stream.lire_entier(HUFFMAN_NOMBRE_SYMBOLES_BITS);
 
         for (unsigned i = 0; i < size; ++i)
         {
@@ -104,6 +104,7 @@ public:
 
             // Symbole
             int symbole = (int) _bit_stream.lire_entier(HUFFMAN_SYMBOLE_BITS);
+            symbole = (symbole << (32 - HUFFMAN_SYMBOLE_BITS)) >> (32 - HUFFMAN_SYMBOLE_BITS);
 
             // Insertion de la branche dans l'arbre
             Noeud * n = racine;
@@ -133,6 +134,9 @@ public:
                         n = t;
                     }
                 }
+                
+                if (n->is_symbole)
+                    throw std::domain_error("Table des symboles corrompue");
             }
 
             // Ecrire le symbole dans l'arbre
