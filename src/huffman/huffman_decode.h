@@ -5,7 +5,7 @@
 #ifndef __HUFFMAN_DECODE_H__
 #define __HUFFMAN_DECODE_H__
 
-#include <outils_bits/outil_bits_in.h>
+#include "../outils_bits/outil_bits_in.h"
 #include "huffman_config.h"
 
 #include <stdexcept>
@@ -85,7 +85,7 @@ public:
     {
         racine = new Noeud();
     }
-    
+
     /**
      * Lire la table des symboles depuis le flux.
      */

@@ -7,6 +7,7 @@
 
 #include "../modele_image/Image.h"
 #include "../huffman.h"
+#include "../division_resolution/division.hpp"
 
 using namespace std;
 
@@ -129,7 +130,7 @@ void encoder(const char * fic, int taille_blocs)
     
     Image differences = Image(image.getWidth(), image.getHeight());
     Image moyennes = Image(image.getWidth()/taille_blocs, image.getHeight()/taille_blocs);
-    
+
 	diff_encode_quad(taille_blocs, image, moyennes, differences);
 
     // Flux de sortie
