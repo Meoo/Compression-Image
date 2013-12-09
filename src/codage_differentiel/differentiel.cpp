@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <bitset>
+#include <cstdlib>
 
 #include "../modele_image/Image.h"
 #include "../huffman.h"
@@ -112,21 +113,18 @@ void diff_encode_quad(int taille_blocs, Image img, Image& moyennes, Image& diffe
 	}
 }
 
-
-#include <bitset>
-
-static int TAILLE_BLOCS = 4;
-
-
-void encoder(const char * fic, int taille_blocs)
+void encoder(const char * fic, const char * sortie, int taille_blocs, int div_resolution)
 {
 	IplImage *img = cvLoadImage(fic);
 
 	Image image = Image(img);
-
-                        IplImage *che = image.getIplImage();
-                        cvNamedWindow("Originale", 1);
-                        cvShowImage("Originale", che);
+    Image compress = Image(1, 1);
+    
+    while (div_resolution-- > 0)
+    {
+        divResolution(image, compress);
+        image = compress;
+    }
     
     Image differences = Image(image.getWidth(), image.getHeight());
     Image moyennes = Image(image.getWidth()/taille_blocs, image.getHeight()/taille_blocs);
@@ -134,7 +132,7 @@ void encoder(const char * fic, int taille_blocs)
 	diff_encode_quad(taille_blocs, image, moyennes, differences);
 
     // Flux de sortie
-    std::ofstream fichier("sortie.bin", std::ios_base::out | std::ios_base::binary);
+    std::ofstream fichier(sortie, std::ios_base::out | std::ios_base::binary);
 
     // Flux de bits
     FluxBitsOut<std::ofstream> fichier_bits(fichier);
@@ -142,11 +140,6 @@ void encoder(const char * fic, int taille_blocs)
     fichier_bits.ecrire_entier(32, image.getWidth());
     fichier_bits.ecrire_entier(32, image.getHeight());
     fichier_bits.ecrire_octet(taille_blocs);
-    
-                            cout << "width " << moyennes.getWidth() << endl;
-                            cout << "height " << moyennes.getHeight() << endl;
-                            cout << "taille_blocs " << taille_blocs << endl;
-
 
     // Moyennes
     for (unsigned x = 0; x < moyennes.getWidth(); ++x)
@@ -192,8 +185,6 @@ void encoder(const char * fic, int taille_blocs)
         }
     }
 
-    // Fermer le fichier
-
     // Ecrire les derniers bits du buffer dans le flux
     fichier_bits.finaliser();
 
@@ -201,13 +192,10 @@ void encoder(const char * fic, int taille_blocs)
     fichier.close();
 }
 
-void decoder()
+void decoder(const char * fic)
 {
-    
-    // Construire le décodeur
-
     // Flux d'entrée
-    std::ifstream fichier("sortie.bin", std::ios_base::in | std::ios_base::binary);
+    std::ifstream fichier(fic, std::ios_base::in | std::ios_base::binary);
 
     // Flux de bits
     FluxBitsIn<std::ifstream> fichier_bits(fichier);
@@ -219,10 +207,6 @@ void decoder()
     Image differences = Image(width, height);
     Image moyennes = Image((width+taille_blocs-1)/taille_blocs, (height+taille_blocs-1)/taille_blocs);
     Image imagedecodee = Image(width, height);
-    
-                            cout << "width " << moyennes.getWidth() << endl;
-                            cout << "height " << moyennes.getHeight() << endl;
-                            cout << "taille_blocs " << taille_blocs << endl;
 
     // Moyennes
     for (unsigned x = 0; x < moyennes.getWidth(); ++x)
@@ -274,17 +258,56 @@ void decoder()
                             IplImage *imgDec = imagedecodee.getIplImage();
                             cvNamedWindow("Decodee", 1);
                             cvShowImage("Decodee", imgDec);
-}
-
-int main()
-{
-    encoder("lena.png", TAILLE_BLOCS);
-    
-    std::cout << std::endl << std::endl;
-    
-    decoder();
 
 	cvWaitKey(0);
+}
+
+void help()
+{
+    std::cout << "Utilisation : " << std::endl
+              << "Enco : prog enco entree sortie taille_blocs(=4) div_resolution(=0)" << std::endl
+              << "Deco : prog deco entree" << std::endl;
+}
+
+int main(int argc, char ** argv)
+{
+    if (argc < 3)
+    {
+        help();
+        return 0;
+    }
+
+    if (argv[1][0] == 'e')
+    {
+        if (argc < 4)
+        {
+            help();
+            return 0;
+        }
+        int taille_blocs = 4;
+        int div_res = 0;
+        
+        if (argc >= 5)
+        {
+            taille_blocs = std::atoi(argv[4]);
+        }
+        
+        if (argc >= 6)
+        {
+            div_res = std::atoi(argv[5]);
+        }
+
+        encoder(argv[2], argv[3], taille_blocs, div_res);
+    }
+    else if (argv[1][0] == 'd')
+    {
+        decoder(argv[2]);
+    }
+    else
+    {
+        help();
+        return 0;
+    }
 
 	return 0;
 }
