@@ -7,6 +7,7 @@
 
 #include "../modele_image/Image.h"
 #include "../huffman.h"
+#include "../division_resolution/division.hpp"
 
 using namespace std;
 
@@ -120,7 +121,21 @@ int main()
     Image differences = Image(image.getWidth(), image.getHeight());
     Image moyennes = Image(image.getWidth()/taille_blocs, image.getHeight()/taille_blocs);
     Image imagedecodee = Image(image.getWidth(), image.getHeight());
-	diff_encode_quad(taille_blocs, image, moyennes, differences);
+    Image imagedivisee = Image(image.getWidth()/2, image.getHeight()/2);
+
+    cout << "Matrice image originale" << endl;
+    IplImage *che = image.getIplImage();
+	cvNamedWindow("Originale", 1);
+	cvShowImage("Originale", che);
+
+    divResolution(image, imagedivisee);
+
+    cout << "Matrice image divisée" << endl;
+	IplImage *imgDiv = imagedivisee.getIplImage();
+	cvNamedWindow("Divisee", 1);
+	cvShowImage("Divisee", imgDiv);
+
+	diff_encode_quad(taille_blocs, imagedivisee, moyennes, differences);
 
 	cout << "Matrice des moyennes" << endl;
 	cout << moyennes.getWidth() << endl;
@@ -129,14 +144,11 @@ int main()
 	cvShowImage("Moyennes", imgMoy);
 	cout << endl;
 
-	cout << "Matrice des différences" << endl;
+    cout << "Matrice des différences" << endl;
 	IplImage *imgDiff = differences.getIplImage();
 	cvNamedWindow("Difference", 1);
 	cvShowImage("Difference", imgDiff);
 	cout << endl;
-
-
-    // HUFFMAN !
 
     diff_decode_quad(taille_blocs, differences, moyennes, imagedecodee);
 
@@ -145,10 +157,12 @@ int main()
 	cvNamedWindow("Decodee", 1);
 	cvShowImage("Decodee", imgDec);
 
-	IplImage *che = image.getIplImage();
+	decodeDivResolution(imagedecodee, image);
 
-	cvNamedWindow("Originale", 1);
-	cvShowImage("Originale", che);
+	cout << "Matrice image décodage résolue" << endl;
+	IplImage *imgRes = image.getIplImage();
+	cvNamedWindow("Resolue", 1);
+	cvShowImage("Resolue", imgRes);
 
 	cvWaitKey(0);
 	cvDestroyWindow("Originale");

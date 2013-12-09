@@ -6,7 +6,7 @@
 #include <fstream>
 #include <bitset>
 
-#include <huffman.h>
+#include "huffman.h"
 
 void encoder()
 {
@@ -110,11 +110,11 @@ void decoder()
 
 }
 
-int main()
+/*int main()
 {
     encoder();
 
     decoder();
 
     return 0;
-}
+}*/

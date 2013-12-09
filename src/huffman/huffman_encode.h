@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include <outils_bits/outil_bits_out.h>
+#include "../outils_bits/outil_bits_out.h"
 #include "huffman_config.h"
 
 /**
@@ -43,7 +43,7 @@ public:
         : _bit_stream(bit_stream)
     {
     }
-    
+
     /**
      * Ecrire la table des symboles dans le flux.
      */
@@ -75,10 +75,10 @@ public:
         enco_t e (_symboles.at(symbole));
         _bit_stream.ecrire_entier(e.second, e.first);
     }
-    
+
 protected:
     friend class HuffmanBuilder;
-    
+
     /**
      * Utilisé en interne par HuffmanBuilder pour rajouter des symboles.
      *
